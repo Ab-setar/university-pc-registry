@@ -1,6 +1,6 @@
-const express = require('express');
-const cors = require('cors');
-const Database = require('better-sqlite3');
+import express, { Request, Response } from 'express';
+import cors from 'cors';
+import Database from 'better-sqlite3';
 
 const app = express();
 const db = new Database('registry.db');
@@ -21,8 +21,26 @@ db.exec(`
   )
 `);
 
+// Types
+interface Registration {
+  id: number;
+  owner_name: string;
+  student_id: string;
+  laptop_brand: string;
+  serial_number: string;
+  status: string;
+  created_at: string;
+}
+
+interface RegisterBody {
+  owner_name: string;
+  student_id: string;
+  laptop_brand: string;
+  serial_number: string;
+}
+
 // Register a laptop (entering campus)
-app.post('/register', (req, res) => {
+app.post('/register', (req: Request<{}, {}, RegisterBody>, res: Response) => {
   const { owner_name, student_id, laptop_brand, serial_number } = req.body;
   const stmt = db.prepare(`
     INSERT INTO registrations (owner_name, student_id, laptop_brand, serial_number)
@@ -33,14 +51,14 @@ app.post('/register', (req, res) => {
 });
 
 // Get all registrations
-app.get('/registrations', (req, res) => {
+app.get('/registrations', (_req: Request, res: Response) => {
   const rows = db.prepare('SELECT * FROM registrations ORDER BY created_at DESC').all();
   res.json(rows);
 });
 
-// Search by serial number (guard checks when leaving)
-app.get('/search/:serial', (req, res) => {
-  const row = db.prepare('SELECT * FROM registrations WHERE serial_number = ?').get(req.params.serial);
+// Search by serial number
+app.get('/search/:serial', (req: Request, res: Response) => {
+  const row = db.prepare('SELECT * FROM registrations WHERE serial_number = ?').get(req.params.serial) as Registration | undefined;
   if (row) {
     res.json({ found: true, data: row });
   } else {
@@ -48,13 +66,13 @@ app.get('/search/:serial', (req, res) => {
   }
 });
 
-// Update status (inside / outside)
-app.put('/status/:id', (req, res) => {
+// Update status
+app.put('/status/:id', (req: Request, res: Response) => {
   const { status } = req.body;
   db.prepare('UPDATE registrations SET status = ? WHERE id = ?').run(status, req.params.id);
   res.json({ success: true });
 });
 
 app.listen(3001, () => {
-  console.log('Server running on http://localhost:3001');
+  console.log('🚀 Server running on http://localhost:3001');
 });
