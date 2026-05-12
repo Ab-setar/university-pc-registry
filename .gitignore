@@ -1,2 +1,15 @@
+# Dependencies
 node_modules
+
+# Environment variables
 .env
+
+# Database file (contains sensitive data)
+backend/registry.db
+
+# Build files
+backend/dist
+frontend/build
+
+# Logs
+npm-debug.log*
