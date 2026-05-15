@@ -57,10 +57,10 @@ function Login({ onLogin }: Props) {
 
                 {message && <p style={styles.message}>{message}</p>}
 
-                <div style={styles.hint}>
+                {/* <div style={styles.hint}>
                     <p>👤 Admin: username: <b>admin</b> password: <b>admin123</b></p>
                     <p>💂 Guard: username: <b>guard</b> password: <b>guard123</b></p>
-                </div>
+                </div> */}
             </div>
         </div>
     );
