@@ -12,20 +12,51 @@ interface Registration {
 
 function AllRegistrations() {
   const [registrations, setRegistrations] = useState<Registration[]>([]);
+  const [filtered, setFiltered] = useState<Registration[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [search, setSearch] = useState<string>('');
+  const [message, setMessage] = useState<string>('');
 
   useEffect(() => {
     fetchAll();
   }, []);
+
+  useEffect(() => {
+    if (search.trim() === '') {
+      setFiltered(registrations);
+    } else {
+      setFiltered(
+        registrations.filter(r =>
+          r.owner_name.toLowerCase().includes(search.toLowerCase()) ||
+          r.serial_number.toLowerCase().includes(search.toLowerCase()) ||
+          r.student_id.toLowerCase().includes(search.toLowerCase())
+        )
+      );
+    }
+  }, [search, registrations]);
 
   const fetchAll = async () => {
     try {
       const res = await fetch('http://localhost:3001/registrations');
       const data: Registration[] = await res.json();
       setRegistrations(data);
+      setFiltered(data);
       setLoading(false);
     } catch (err) {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!window.confirm('Are you sure you want to delete this record?')) return;
+    try {
+      await fetch(`http://localhost:3001/delete/${id}`, {
+        method: 'DELETE',
+      });
+      setMessage('✅ Record deleted successfully!');
+      fetchAll();
+    } catch (err) {
+      setMessage('❌ Error deleting record!');
     }
   };
 
@@ -34,13 +65,23 @@ function AllRegistrations() {
       <h2 style={styles.title}>📋 All Registrations</h2>
       <p style={styles.subtitle}>All laptops registered on campus</p>
 
+      {/* Search Box */}
+      <input
+        style={styles.input}
+        placeholder="🔍 Search by name, student ID or serial number..."
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+      />
+
+      {message && <p style={styles.message}>{message}</p>}
+
       {loading && <p>Loading...</p>}
 
-      {!loading && registrations.length === 0 && (
-        <p style={styles.empty}>No laptops registered yet.</p>
+      {!loading && filtered.length === 0 && (
+        <p style={styles.empty}>No laptops found.</p>
       )}
 
-      {registrations.map(reg => (
+      {filtered.map(reg => (
         <div key={reg.id} style={styles.item}>
           <div style={styles.row}>
             <span style={styles.label}>👤 Owner:</span> {reg.owner_name}
@@ -63,6 +104,12 @@ function AllRegistrations() {
               {reg.status === 'inside' ? '🟢 Inside Campus' : '🔴 Outside Campus'}
             </span>
           </div>
+          <button
+            style={styles.deleteBtn}
+            onClick={() => handleDelete(reg.id)}
+          >
+            🗑️ Delete Record
+          </button>
         </div>
       ))}
     </div>
@@ -73,12 +120,15 @@ const styles: { [key: string]: React.CSSProperties } = {
   card: { background: 'white', borderRadius: '12px', padding: '30px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' },
   title: { margin: '0 0 5px', color: '#1a237e' },
   subtitle: { margin: '0 0 20px', color: '#666' },
+  input: { display: 'block', width: '100%', padding: '12px', marginBottom: '20px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '16px', boxSizing: 'border-box' },
   empty: { textAlign: 'center', color: '#666', fontSize: '16px' },
+  message: { textAlign: 'center', fontSize: '16px', marginBottom: '15px' },
   item: { background: '#f5f5f5', borderRadius: '8px', padding: '15px', marginBottom: '15px' },
   row: { marginBottom: '8px', fontSize: '15px' },
   label: { fontWeight: 'bold', marginRight: '8px' },
   inside: { color: 'green', fontWeight: 'bold' },
   outside: { color: 'red', fontWeight: 'bold' },
+  deleteBtn: { marginTop: '10px', padding: '10px 20px', background: 'red', color: 'white', border: 'none', borderRadius: '8px', fontSize: '15px', cursor: 'pointer' },
 };
 
 export default AllRegistrations;
