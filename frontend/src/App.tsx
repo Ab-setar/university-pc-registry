@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Login from './components/Login';
 import Register from './components/Register';
@@ -30,45 +29,61 @@ function App() {
   }
 
   return (
-    <div style={styles.container}>
+    <div className="min-h-screen bg-gray-100">
+
       {/* Header */}
-      <div style={styles.header}>
-        <h1 style={styles.title}>🎓 University PC Registry</h1>
-        <p style={styles.subtitle}>Campus Laptop Management System</p>
-        <div style={styles.userInfo}>
-          <span>👤 {username} ({role})</span>
-          <button style={styles.logoutBtn} onClick={handleLogout}>Logout</button>
+      <div className="bg-blue-900 text-white px-6 py-4 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">🎓 University PC Registry</h1>
+          <p className="text-blue-200 text-sm">Campus Laptop Management System</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <span className="text-blue-200 text-sm">👤 {username} ({role})</span>
+          <button
+            className="bg-white text-blue-900 px-4 py-2 rounded-lg font-semibold text-sm hover:bg-blue-100 transition"
+            onClick={handleLogout}
+          >
+            Logout
+          </button>
         </div>
       </div>
 
       {/* Navigation */}
-      <div style={styles.nav}>
+      <div className="bg-white shadow flex justify-center gap-4 px-6 py-3">
         {role === 'admin' && (
           <button
-            style={page === 'register' ? styles.activeBtn : styles.btn}
+            className={`px-6 py-2 rounded-lg font-semibold text-sm transition ${page === 'register' ? 'bg-blue-900 text-white' : 'border-2 border-blue-900 text-blue-900 hover:bg-blue-50'}`}
             onClick={() => setPage('register')}
           >
             📝 Register Laptop
           </button>
         )}
         <button
-          style={page === 'search' ? styles.activeBtn : styles.btn}
+          className={`px-6 py-2 rounded-lg font-semibold text-sm transition ${page === 'search' ? 'bg-blue-900 text-white' : 'border-2 border-blue-900 text-blue-900 hover:bg-blue-50'}`}
           onClick={() => setPage('search')}
         >
           🔍 Guard Check
         </button>
         {role === 'admin' && (
           <button
-            style={page === 'all' ? styles.activeBtn : styles.btn}
+            className={`px-6 py-2 rounded-lg font-semibold text-sm transition ${page === 'all' ? 'bg-blue-900 text-white' : 'border-2 border-blue-900 text-blue-900 hover:bg-blue-50'}`}
             onClick={() => setPage('all')}
           >
             📋 All Records
           </button>
         )}
+        {role === 'admin' && (
+          <button
+            className={`px-6 py-2 rounded-lg font-semibold text-sm transition ${page === 'stats' ? 'bg-blue-900 text-white' : 'border-2 border-blue-900 text-blue-900 hover:bg-blue-50'}`}
+            onClick={() => setPage('stats')}
+          >
+            📊 Statistics
+          </button>
+        )}
       </div>
 
-      {/* Pages */}
-      <div style={styles.content}>
+      {/* Content */}
+      <div className="max-w-3xl mx-auto px-4 py-8">
         {page === 'register' && role === 'admin' && <Register />}
         {page === 'search' && <Search />}
         {page === 'all' && role === 'admin' && <AllRegistrations />}
@@ -76,18 +91,5 @@ function App() {
     </div>
   );
 }
-
-const styles: { [key: string]: React.CSSProperties } = {
-  container: { fontFamily: 'Arial, sans-serif', minHeight: '100vh', background: '#f0f2f5' },
-  header: { background: '#1a237e', color: 'white', padding: '20px', textAlign: 'center', position: 'relative' },
-  title: { margin: 0, fontSize: '28px' },
-  subtitle: { margin: '5px 0 0', opacity: 0.8 },
-  userInfo: { position: 'absolute', top: '20px', right: '20px', display: 'flex', alignItems: 'center', gap: '10px' },
-  logoutBtn: { padding: '8px 16px', background: 'white', color: '#1a237e', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 'bold' },
-  nav: { display: 'flex', justifyContent: 'center', gap: '10px', padding: '20px', background: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)' },
-  btn: { padding: '10px 20px', border: '2px solid #1a237e', borderRadius: '8px', background: 'white', color: '#1a237e', cursor: 'pointer', fontSize: '16px' },
-  activeBtn: { padding: '10px 20px', border: '2px solid #1a237e', borderRadius: '8px', background: '#1a237e', color: 'white', cursor: 'pointer', fontSize: '16px' },
-  content: { maxWidth: '800px', margin: '30px auto', padding: '0 20px' },
-};
 
 export default App;
