@@ -61,74 +61,62 @@ function AllRegistrations() {
   };
 
   return (
-    <div style={styles.card}>
-      <h2 style={styles.title}>📋 All Registrations</h2>
-      <p style={styles.subtitle}>All laptops registered on campus</p>
+    <div className="bg-white rounded-2xl shadow p-8">
+      <h2 className="text-2xl font-bold text-blue-900 mb-1">📋 All Registrations</h2>
+      <p className="text-gray-500 mb-6">All laptops registered on campus</p>
 
-      {/* Search Box */}
+      {/* Search */}
       <input
-        style={styles.input}
+        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-6"
         placeholder="🔍 Search by name, student ID or serial number..."
         value={search}
         onChange={e => setSearch(e.target.value)}
       />
 
-      {message && <p style={styles.message}>{message}</p>}
-
-      {loading && <p>Loading...</p>}
-
-      {!loading && filtered.length === 0 && (
-        <p style={styles.empty}>No laptops found.</p>
+      {message && (
+        <div className="bg-green-50 text-green-600 px-4 py-3 rounded-lg mb-6 font-medium">
+          {message}
+        </div>
       )}
 
-      {filtered.map(reg => (
-        <div key={reg.id} style={styles.item}>
-          <div style={styles.row}>
-            <span style={styles.label}>👤 Owner:</span> {reg.owner_name}
+      {loading && (
+        <div className="text-center py-10 text-gray-500">Loading...</div>
+      )}
+
+      {!loading && filtered.length === 0 && (
+        <div className="text-center py-10 text-gray-500">No laptops found.</div>
+      )}
+
+      <div className="space-y-4">
+        {filtered.map(reg => (
+          <div key={reg.id} className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition">
+            <div className="flex justify-between items-start mb-3">
+              <div>
+                <h3 className="text-lg font-bold text-blue-900">{reg.owner_name}</h3>
+                <p className="text-gray-500 text-sm">🎓 {reg.student_id}</p>
+              </div>
+              <span className={`px-3 py-1 rounded-full text-sm font-semibold ${reg.status === 'inside' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                {reg.status === 'inside' ? '🟢 Inside' : '🔴 Outside'}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-2 gap-2 text-sm text-gray-600 mb-4">
+              <div><span className="font-medium">💻 Brand:</span> {reg.laptop_brand}</div>
+              <div><span className="font-medium">🔢 Serial:</span> {reg.serial_number}</div>
+              <div className="col-span-2"><span className="font-medium">📅 Date:</span> {new Date(reg.created_at).toLocaleString()}</div>
+            </div>
+
+            <button
+              className="bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-100 transition"
+              onClick={() => handleDelete(reg.id)}
+            >
+              🗑️ Delete Record
+            </button>
           </div>
-          <div style={styles.row}>
-            <span style={styles.label}>🎓 Student ID:</span> {reg.student_id}
-          </div>
-          <div style={styles.row}>
-            <span style={styles.label}>💻 Brand:</span> {reg.laptop_brand}
-          </div>
-          <div style={styles.row}>
-            <span style={styles.label}>🔢 Serial:</span> {reg.serial_number}
-          </div>
-          <div style={styles.row}>
-            <span style={styles.label}>📅 Date:</span> {new Date(reg.created_at).toLocaleString()}
-          </div>
-          <div style={styles.row}>
-            <span style={styles.label}>Status:</span>
-            <span style={reg.status === 'inside' ? styles.inside : styles.outside}>
-              {reg.status === 'inside' ? '🟢 Inside Campus' : '🔴 Outside Campus'}
-            </span>
-          </div>
-          <button
-            style={styles.deleteBtn}
-            onClick={() => handleDelete(reg.id)}
-          >
-            🗑️ Delete Record
-          </button>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 }
-
-const styles: { [key: string]: React.CSSProperties } = {
-  card: { background: 'white', borderRadius: '12px', padding: '30px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' },
-  title: { margin: '0 0 5px', color: '#1a237e' },
-  subtitle: { margin: '0 0 20px', color: '#666' },
-  input: { display: 'block', width: '100%', padding: '12px', marginBottom: '20px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '16px', boxSizing: 'border-box' },
-  empty: { textAlign: 'center', color: '#666', fontSize: '16px' },
-  message: { textAlign: 'center', fontSize: '16px', marginBottom: '15px' },
-  item: { background: '#f5f5f5', borderRadius: '8px', padding: '15px', marginBottom: '15px' },
-  row: { marginBottom: '8px', fontSize: '15px' },
-  label: { fontWeight: 'bold', marginRight: '8px' },
-  inside: { color: 'green', fontWeight: 'bold' },
-  outside: { color: 'red', fontWeight: 'bold' },
-  deleteBtn: { marginTop: '10px', padding: '10px 20px', background: 'red', color: 'white', border: 'none', borderRadius: '8px', fontSize: '15px', cursor: 'pointer' },
-};
 
 export default AllRegistrations;

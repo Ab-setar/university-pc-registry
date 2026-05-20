@@ -14,12 +14,14 @@ function Search() {
   const [serial, setSerial] = useState<string>('');
   const [result, setResult] = useState<Registration | null>(null);
   const [message, setMessage] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false);
 
   const handleSearch = async () => {
     if (!serial) {
       setMessage('❌ Please enter a serial number!');
       return;
     }
+    setLoading(true);
     try {
       const res = await fetch(`http://localhost:3001/search/${serial}`);
       const data = await res.json();
@@ -33,6 +35,7 @@ function Search() {
     } catch (err) {
       setMessage('❌ Error connecting to server!');
     }
+    setLoading(false);
   };
 
   const handleStatus = async (id: number, status: string) => {
@@ -49,40 +52,75 @@ function Search() {
   };
 
   return (
-    <div style={styles.card}>
-      <h2 style={styles.title}>🔍 Guard Check</h2>
-      <p style={styles.subtitle}>Search laptop by serial number when leaving campus</p>
+    <div className="bg-white rounded-2xl shadow p-8">
+      <h2 className="text-2xl font-bold text-blue-900 mb-1">🔍 Guard Check</h2>
+      <p className="text-gray-500 mb-6">Search laptop by serial number when leaving campus</p>
 
-      <input
-        style={styles.input}
-        placeholder="Enter Serial Number"
-        value={serial}
-        onChange={e => setSerial(e.target.value)}
-      />
-      <button style={styles.btn} onClick={handleSearch}>
-        Search
-      </button>
+      <div className="flex gap-3 mb-6">
+        <input
+          className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg"
+          placeholder="Enter Serial Number"
+          value={serial}
+          onChange={e => setSerial(e.target.value)}
+        />
+        <button
+          className="bg-blue-900 text-white px-8 py-3 rounded-lg font-semibold hover:bg-blue-800 transition"
+          onClick={handleSearch}
+        >
+          {loading ? '...' : 'Search'}
+        </button>
+      </div>
 
-      {message && <p style={styles.message}>{message}</p>}
+      {message && (
+        <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg mb-6 font-medium">
+          {message}
+        </div>
+      )}
 
       {result && (
-        <div style={styles.result}>
-          <h3 style={styles.resultTitle}>✅ Laptop Found!</h3>
-          <div style={styles.row}><span style={styles.label}>Owner:</span> {result.owner_name}</div>
-          <div style={styles.row}><span style={styles.label}>Student ID:</span> {result.student_id}</div>
-          <div style={styles.row}><span style={styles.label}>Brand:</span> {result.laptop_brand}</div>
-          <div style={styles.row}><span style={styles.label}>Serial:</span> {result.serial_number}</div>
-          <div style={styles.row}>
-            <span style={styles.label}>Status:</span>
-            <span style={result.status === 'inside' ? styles.inside : styles.outside}>
-              {result.status === 'inside' ? '🟢 Inside Campus' : '🔴 Outside Campus'}
-            </span>
+        <div className="border-2 border-blue-900 rounded-xl p-6">
+          <h3 className="text-xl font-bold text-green-600 mb-4">✅ Laptop Found!</h3>
+
+          <div className="space-y-3 mb-6">
+            <div className="flex justify-between py-2 border-b border-gray-100">
+              <span className="font-semibold text-blue-900">👤 Owner</span>
+              <span>{result.owner_name}</span>
+            </div>
+            <div className="flex justify-between py-2 border-b border-gray-100">
+              <span className="font-semibold text-blue-900">🎓 Student ID</span>
+              <span>{result.student_id}</span>
+            </div>
+            <div className="flex justify-between py-2 border-b border-gray-100">
+              <span className="font-semibold text-blue-900">💻 Brand</span>
+              <span>{result.laptop_brand}</span>
+            </div>
+            <div className="flex justify-between py-2 border-b border-gray-100">
+              <span className="font-semibold text-blue-900">🔢 Serial</span>
+              <span>{result.serial_number}</span>
+            </div>
+            <div className="flex justify-between py-2 border-b border-gray-100">
+              <span className="font-semibold text-blue-900">📅 Registered</span>
+              <span>{new Date(result.created_at).toLocaleString()}</span>
+            </div>
+            <div className="flex justify-between py-2">
+              <span className="font-semibold text-blue-900">Status</span>
+              <span className={`font-bold ${result.status === 'inside' ? 'text-green-600' : 'text-red-600'}`}>
+                {result.status === 'inside' ? '🟢 Inside Campus' : '🔴 Outside Campus'}
+              </span>
+            </div>
           </div>
-          <div style={styles.buttons}>
-            <button style={styles.greenBtn} onClick={() => handleStatus(result.id, 'inside')}>
+
+          <div className="grid grid-cols-2 gap-4">
+            <button
+              className="bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition"
+              onClick={() => handleStatus(result.id, 'inside')}
+            >
               ✅ Mark as Inside
             </button>
-            <button style={styles.redBtn} onClick={() => handleStatus(result.id, 'outside')}>
+            <button
+              className="bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition"
+              onClick={() => handleStatus(result.id, 'outside')}
+            >
               🚪 Mark as Outside
             </button>
           </div>
@@ -91,23 +129,5 @@ function Search() {
     </div>
   );
 }
-
-const styles: { [key: string]: React.CSSProperties } = {
-  card: { background: 'white', borderRadius: '12px', padding: '30px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)' },
-  title: { margin: '0 0 5px', color: '#1a237e' },
-  subtitle: { margin: '0 0 20px', color: '#666' },
-  input: { display: 'block', width: '100%', padding: '12px', marginBottom: '15px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '16px', boxSizing: 'border-box' },
-  btn: { width: '100%', padding: '14px', background: '#1a237e', color: 'white', border: 'none', borderRadius: '8px', fontSize: '16px', cursor: 'pointer' },
-  message: { textAlign: 'center', marginTop: '15px', fontSize: '16px' },
-  result: { marginTop: '20px', padding: '20px', background: '#f5f5f5', borderRadius: '8px' },
-  resultTitle: { margin: '0 0 15px', color: '#1a237e' },
-  row: { marginBottom: '10px', fontSize: '16px' },
-  label: { fontWeight: 'bold', marginRight: '10px' },
-  inside: { color: 'green', fontWeight: 'bold' },
-  outside: { color: 'red', fontWeight: 'bold' },
-  buttons: { display: 'flex', gap: '10px', marginTop: '15px' },
-  greenBtn: { flex: 1, padding: '12px', background: 'green', color: 'white', border: 'none', borderRadius: '8px', fontSize: '16px', cursor: 'pointer' },
-  redBtn: { flex: 1, padding: '12px', background: 'red', color: 'white', border: 'none', borderRadius: '8px', fontSize: '16px', cursor: 'pointer' },
-};
 
 export default Search;
