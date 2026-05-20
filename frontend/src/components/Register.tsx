@@ -55,86 +55,109 @@ function Register() {
     }
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
-
   return (
-    <div>
-      <div className="no-print" style={styles.card}>
-        <h2 style={styles.title}>📝 Register Laptop</h2>
-        <p style={styles.subtitle}>Fill in the details when entering campus</p>
+    <div className="space-y-6">
 
-        <input
-          style={styles.input}
-          placeholder="Owner Full Name"
-          value={form.owner_name}
-          onChange={e => setForm({ ...form, owner_name: e.target.value })}
-        />
-        <input
-          style={styles.input}
-          placeholder="Student ID"
-          value={form.student_id}
-          onChange={e => setForm({ ...form, student_id: e.target.value })}
-        />
-        <input
-          style={styles.input}
-          placeholder="Laptop Brand (e.g. Dell, HP, Lenovo)"
-          value={form.laptop_brand}
-          onChange={e => setForm({ ...form, laptop_brand: e.target.value })}
-        />
-        <input
-          style={styles.input}
-          placeholder="Serial Number"
-          value={form.serial_number}
-          onChange={e => setForm({ ...form, serial_number: e.target.value })}
-        />
+      {/* Form Card */}
+      <div className="no-print bg-white rounded-2xl shadow p-8">
+        <h2 className="text-2xl font-bold text-blue-900 mb-1">📝 Register Laptop</h2>
+        <p className="text-gray-500 mb-6">Fill in the details when entering campus</p>
 
-        <button style={styles.btn} onClick={handleSubmit}>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Owner Full Name</label>
+            <input
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g. Fatima Ahmed"
+              value={form.owner_name}
+              onChange={e => setForm({ ...form, owner_name: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Student ID</label>
+            <input
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g. UGR/12345/15"
+              value={form.student_id}
+              onChange={e => setForm({ ...form, student_id: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Laptop Brand</label>
+            <input
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g. Dell, HP, Lenovo"
+              value={form.laptop_brand}
+              onChange={e => setForm({ ...form, laptop_brand: e.target.value })}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Serial Number</label>
+            <input
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="e.g. ABC123XYZ"
+              value={form.serial_number}
+              onChange={e => setForm({ ...form, serial_number: e.target.value })}
+            />
+          </div>
+        </div>
+
+        <button
+          className="w-full mt-6 bg-blue-900 text-white py-3 rounded-lg text-lg font-semibold hover:bg-blue-800 transition"
+          onClick={handleSubmit}
+        >
           Register Laptop
         </button>
 
-        {message && <p style={styles.message}>{message}</p>}
+        {message && (
+          <p className="text-center mt-4 font-medium text-green-600">{message}</p>
+        )}
       </div>
 
       {/* Receipt */}
       {receipt && (
-        <div style={styles.receiptCard}>
-          <div style={styles.receiptHeader}>
-            <h2 style={styles.receiptTitle}>🎓 University PC Registry</h2>
-            <p style={styles.receiptSubtitle}>Registration Receipt</p>
+        <div className="bg-white rounded-2xl shadow p-8 border-2 border-dashed border-blue-900">
+          <div className="text-center border-b-2 border-blue-900 pb-4 mb-6">
+            <div className="text-4xl mb-2">🎓</div>
+            <h2 className="text-2xl font-bold text-blue-900">University PC Registry</h2>
+            <p className="text-gray-500">Registration Receipt</p>
           </div>
-          <div style={styles.receiptBody}>
-            <div style={styles.receiptRow}>
-              <span style={styles.receiptLabel}>Registration ID:</span>
+
+          <div className="space-y-3">
+            <div className="flex justify-between py-2 border-b border-gray-100">
+              <span className="font-semibold text-blue-900">Registration ID</span>
               <span>#{receipt.id}</span>
             </div>
-            <div style={styles.receiptRow}>
-              <span style={styles.receiptLabel}>Owner Name:</span>
+            <div className="flex justify-between py-2 border-b border-gray-100">
+              <span className="font-semibold text-blue-900">Owner Name</span>
               <span>{receipt.owner_name}</span>
             </div>
-            <div style={styles.receiptRow}>
-              <span style={styles.receiptLabel}>Student ID:</span>
+            <div className="flex justify-between py-2 border-b border-gray-100">
+              <span className="font-semibold text-blue-900">Student ID</span>
               <span>{receipt.student_id}</span>
             </div>
-            <div style={styles.receiptRow}>
-              <span style={styles.receiptLabel}>Laptop Brand:</span>
+            <div className="flex justify-between py-2 border-b border-gray-100">
+              <span className="font-semibold text-blue-900">Laptop Brand</span>
               <span>{receipt.laptop_brand}</span>
             </div>
-            <div style={styles.receiptRow}>
-              <span style={styles.receiptLabel}>Serial Number:</span>
+            <div className="flex justify-between py-2 border-b border-gray-100">
+              <span className="font-semibold text-blue-900">Serial Number</span>
               <span>{receipt.serial_number}</span>
             </div>
-            <div style={styles.receiptRow}>
-              <span style={styles.receiptLabel}>Date & Time:</span>
+            <div className="flex justify-between py-2 border-b border-gray-100">
+              <span className="font-semibold text-blue-900">Date & Time</span>
               <span>{receipt.created_at}</span>
             </div>
-            <div style={styles.receiptRow}>
-              <span style={styles.receiptLabel}>Status:</span>
-              <span style={{ color: 'green', fontWeight: 'bold' }}>🟢 Inside Campus</span>
+            <div className="flex justify-between py-2">
+              <span className="font-semibold text-blue-900">Status</span>
+              <span className="text-green-600 font-bold">🟢 Inside Campus</span>
             </div>
           </div>
-          <button className="no-print" style={styles.printBtn} onClick={handlePrint}>
+
+          <button
+            className="no-print w-full mt-6 bg-green-600 text-white py-3 rounded-lg text-lg font-semibold hover:bg-green-700 transition"
+            onClick={() => window.print()}
+          >
             🖨️ Print Receipt
           </button>
         </div>
@@ -142,22 +165,5 @@ function Register() {
     </div>
   );
 }
-
-const styles: { [key: string]: React.CSSProperties } = {
-  card: { background: 'white', borderRadius: '12px', padding: '30px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', marginBottom: '20px' },
-  title: { margin: '0 0 5px', color: '#1a237e' },
-  subtitle: { margin: '0 0 20px', color: '#666' },
-  input: { display: 'block', width: '100%', padding: '12px', marginBottom: '15px', borderRadius: '8px', border: '1px solid #ddd', fontSize: '16px', boxSizing: 'border-box' },
-  btn: { width: '100%', padding: '14px', background: '#1a237e', color: 'white', border: 'none', borderRadius: '8px', fontSize: '16px', cursor: 'pointer' },
-  message: { textAlign: 'center', marginTop: '15px', fontSize: '16px' },
-  receiptCard: { background: 'white', borderRadius: '12px', padding: '30px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', border: '2px dashed #1a237e' },
-  receiptHeader: { textAlign: 'center', marginBottom: '20px', borderBottom: '2px solid #1a237e', paddingBottom: '15px' },
-  receiptTitle: { margin: '0 0 5px', color: '#1a237e' },
-  receiptSubtitle: { margin: 0, color: '#666' },
-  receiptBody: { marginBottom: '20px' },
-  receiptRow: { display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #eee', fontSize: '16px' },
-  receiptLabel: { fontWeight: 'bold', color: '#1a237e' },
-  printBtn: { width: '100%', padding: '14px', background: '#4caf50', color: 'white', border: 'none', borderRadius: '8px', fontSize: '16px', cursor: 'pointer' },
-};
 
 export default Register;
