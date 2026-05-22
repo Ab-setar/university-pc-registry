@@ -3,6 +3,7 @@ import Login from './components/Login';
 import Register from './components/Register';
 import Search from './components/Search';
 import AllRegistrations from './components/AllRegistrations';
+import Stats from './components/Stats';
 
 function App() {
   const [page, setPage] = useState<string>('register');
@@ -87,6 +88,7 @@ function App() {
         {page === 'register' && role === 'admin' && <Register />}
         {page === 'search' && <Search />}
         {page === 'all' && role === 'admin' && <AllRegistrations />}
+        {page === 'stats' && role === 'admin' && <Stats />}
       </div>
     </div>
   );
