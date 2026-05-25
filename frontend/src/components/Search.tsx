@@ -23,7 +23,7 @@ function Search() {
     }
     setLoading(true);
     try {
-      const res = await fetch(`http://localhost:3001/search/${serial}`);
+      const res = await fetch(`/api/search/${serial}`);
       const data = await res.json();
       if (data.found) {
         setResult(data.data);
@@ -40,7 +40,7 @@ function Search() {
 
   const handleStatus = async (id: number, status: string) => {
     try {
-      await fetch(`http://localhost:3001/status/${id}`, {
+      await fetch(`/api/status/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
