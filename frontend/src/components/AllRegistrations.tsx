@@ -39,7 +39,7 @@ function AllRegistrations() {
 
   const fetchAll = async () => {
     try {
-      const res = await fetch('/api/registrations');
+      const res = await fetch('https://university-pc-registry-production.up.railway.app/registrations');
       const data: Registration[] = await res.json();
       setRegistrations(data);
       setFiltered(data);
@@ -52,7 +52,7 @@ function AllRegistrations() {
   const handleDelete = async (id: number) => {
     if (!window.confirm('Are you sure you want to delete this record?')) return;
     try {
-      await fetch(`/api/delete/${id}`, {
+      await fetch(`https://university-pc-registry-production.up.railway.app/delete/${id}`, {
         method: 'DELETE',
       });
       setMessage('✅ Record deleted successfully!');

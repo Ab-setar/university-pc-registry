@@ -15,7 +15,7 @@ function Login({ onLogin }: Props) {
             return;
         }
         try {
-            const res = await fetch('/api/login', {
+            const res = await fetch('https://university-pc-registry-production.up.railway.app/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, password }),

@@ -25,7 +25,7 @@ function Stats() {
 
   const fetchAll = async () => {
     try {
-      const res = await fetch('/api/registrations');
+      const res = await fetch('https://university-pc-registry-production.up.railway.app/registrations');
       const data: Registration[] = await res.json();
       setRegistrations(data);
       setLoading(false);
