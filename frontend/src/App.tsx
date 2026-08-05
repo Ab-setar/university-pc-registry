@@ -4,94 +4,262 @@ import Register from './components/Register';
 import Search from './components/Search';
 import AllRegistrations from './components/AllRegistrations';
 import Stats from './components/Stats';
+import Dashboard from './components/Dashboard';
+
+interface User {
+  role: string;
+  username: string;
+}
 
 function App() {
-  const [page, setPage] = useState<string>('register');
-  const [role, setRole] = useState<string | null>(null);
-  const [username, setUsername] = useState<string>('');
+  const [page, setPage] = useState<string>('dashboard');
+  const [user, setUser] = useState<User | null>(null);
 
-  const handleLogin = (userRole: string, userName: string) => {
-    setRole(userRole);
-    setUsername(userName);
-    if (userRole === 'guard') {
-      setPage('search');
-    } else {
-      setPage('register');
-    }
+  const handleLogin = (role: string, username: string) => {
+    setUser({ role, username });
+    setPage('dashboard');
   };
 
   const handleLogout = () => {
-    setRole(null);
-    setUsername('');
+    setUser(null);
+    setPage('dashboard');
   };
 
-  if (!role) {
-    return <Login onLogin={handleLogin} />;
-  }
+  if (!user) return <Login onLogin={handleLogin} />;
+
+  const initials = user.username.slice(0, 2).toUpperCase();
+
+  const navItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: '▦', section: 'main' },
+    { id: 'register', label: 'Register PC', icon: '+', section: 'main', adminOnly: false },
+    { id: 'search', label: 'Search', icon: '⌕', section: 'main' },
+    { id: 'all', label: 'All computers', icon: '☰', section: 'admin', adminOnly: true },
+    { id: 'stats', label: 'Analytics', icon: '↗', section: 'admin', adminOnly: true },
+  ];
+
+  const filteredNav = navItems.filter(item => !item.adminOnly || user.role === 'admin');
 
   return (
-    <div className="min-h-screen bg-gray-100">
-
-      {/* Header */}
-      <div className="bg-blue-900 text-white px-6 py-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">🎓 University PC Registry</h1>
-          <p className="text-blue-200 text-sm">Campus Laptop Management System</p>
+    <div style={styles.app}>
+      {/* Sidebar */}
+      <div style={styles.sidebar}>
+        <div style={styles.logoWrap}>
+          <div style={styles.logoIcon}>💻</div>
+          <div>
+            <div style={styles.logoTitle}>PC Registry</div>
+            <div style={styles.logoSub}>Univ. of Addis Ababa</div>
+          </div>
         </div>
-        <div className="flex items-center gap-4">
-          <span className="text-blue-200 text-sm">👤 {username} ({role})</span>
-          <button
-            className="bg-white text-blue-900 px-4 py-2 rounded-lg font-semibold text-sm hover:bg-blue-100 transition"
-            onClick={handleLogout}
-          >
-            Logout
-          </button>
+
+        <nav style={styles.nav}>
+          {user.role === 'admin' && <div style={styles.navSection}>Main</div>}
+          {filteredNav.filter(i => i.section === 'main').map(item => (
+            <div
+              key={item.id}
+              style={page === item.id ? styles.navItemActive : styles.navItem}
+              onClick={() => setPage(item.id)}
+            >
+              <span style={styles.navIcon}>{item.icon}</span>
+              {item.label}
+            </div>
+          ))}
+
+          {user.role === 'admin' && (
+            <>
+              <div style={styles.navSection}>Admin</div>
+              {filteredNav.filter(i => i.section === 'admin').map(item => (
+                <div
+                  key={item.id}
+                  style={page === item.id ? styles.navItemActive : styles.navItem}
+                  onClick={() => setPage(item.id)}
+                >
+                  <span style={styles.navIcon}>{item.icon}</span>
+                  {item.label}
+                </div>
+              ))}
+            </>
+          )}
+        </nav>
+
+        <div style={styles.sidebarFooter}>
+          <div style={styles.userRow}>
+            <div style={styles.avatar}>{initials}</div>
+            <div style={{ flex: 1 }}>
+              <div style={styles.userName}>{user.username}</div>
+              <div style={styles.userRole}>{user.role}</div>
+            </div>
+            <div style={styles.logoutBtn} onClick={handleLogout}>↩</div>
+          </div>
         </div>
       </div>
 
-      {/* Navigation */}
-      <div className="bg-white shadow flex justify-center gap-4 px-6 py-3">
-        {role === 'admin' && (
-          <button
-            className={`px-6 py-2 rounded-lg font-semibold text-sm transition ${page === 'register' ? 'bg-blue-900 text-white' : 'border-2 border-blue-900 text-blue-900 hover:bg-blue-50'}`}
-            onClick={() => setPage('register')}
-          >
-            📝 Register Laptop
-          </button>
-        )}
-        <button
-          className={`px-6 py-2 rounded-lg font-semibold text-sm transition ${page === 'search' ? 'bg-blue-900 text-white' : 'border-2 border-blue-900 text-blue-900 hover:bg-blue-50'}`}
-          onClick={() => setPage('search')}
-        >
-          🔍 Guard Check
-        </button>
-        {role === 'admin' && (
-          <button
-            className={`px-6 py-2 rounded-lg font-semibold text-sm transition ${page === 'all' ? 'bg-blue-900 text-white' : 'border-2 border-blue-900 text-blue-900 hover:bg-blue-50'}`}
-            onClick={() => setPage('all')}
-          >
-            📋 All Records
-          </button>
-        )}
-        {role === 'admin' && (
-          <button
-            className={`px-6 py-2 rounded-lg font-semibold text-sm transition ${page === 'stats' ? 'bg-blue-900 text-white' : 'border-2 border-blue-900 text-blue-900 hover:bg-blue-50'}`}
-            onClick={() => setPage('stats')}
-          >
-            📊 Statistics
-          </button>
-        )}
+      {/* Main content */}
+      <div style={styles.main}>
+        {/* Topbar */}
+        <div style={styles.topbar}>
+          <div style={styles.topbarLeft}>
+            <span style={styles.breadcrumb}>
+              {page.charAt(0).toUpperCase() + page.slice(1)}
+            </span>
+          </div>
+          <div style={styles.topbarRight}>
+            <div style={styles.statusBadge}>
+              <div style={styles.statusDot} />
+              System online
+            </div>
+import React, { useState } from 'react';
+import Login from './components/Login';
+import Register from './components/Register';
+import Search from './components/Search';
+import AllRegistrations from './components/AllRegistrations';
+import Stats from './components/Stats';
+import Dashboard from './components/Dashboard';
+
+interface User {
+  role: string;
+  username: string;
+}
+
+function App() {
+  const [page, setPage] = useState<string>('dashboard');
+  const [user, setUser] = useState<User | null>(null);
+
+  const handleLogin = (role: string, username: string) => {
+    setUser({ role, username });
+    setPage('dashboard');
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    setPage('dashboard');
+  };
+
+  if (!user) return <Login onLogin={handleLogin} />;
+
+  const initials = user.username.slice(0, 2).toUpperCase();
+
+  const navItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: '▦', section: 'main' },
+    { id: 'register', label: 'Register PC', icon: '+', section: 'main', adminOnly: false },
+    { id: 'search', label: 'Search', icon: '⌕', section: 'main' },
+    { id: 'all', label: 'All computers', icon: '☰', section: 'admin', adminOnly: true },
+    { id: 'stats', label: 'Analytics', icon: '↗', section: 'admin', adminOnly: true },
+  ];
+
+  const filteredNav = navItems.filter(item => !item.adminOnly || user.role === 'admin');
+
+  return (
+    <div style={styles.app}>
+      {/* Sidebar */}
+      <div style={styles.sidebar}>
+        <div style={styles.logoWrap}>
+          <div style={styles.logoIcon}>💻</div>
+          <div>
+            <div style={styles.logoTitle}>PC Registry</div>
+            <div style={styles.logoSub}>Univ. of Addis Ababa</div>
+          </div>
+        </div>
+
+        <nav style={styles.nav}>
+          {user.role === 'admin' && <div style={styles.navSection}>Main</div>}
+          {filteredNav.filter(i => i.section === 'main').map(item => (
+            <div
+              key={item.id}
+              style={page === item.id ? styles.navItemActive : styles.navItem}
+              onClick={() => setPage(item.id)}
+            >
+              <span style={styles.navIcon}>{item.icon}</span>
+              {item.label}
+            </div>
+          ))}
+
+          {user.role === 'admin' && (
+            <>
+              <div style={styles.navSection}>Admin</div>
+              {filteredNav.filter(i => i.section === 'admin').map(item => (
+                <div
+                  key={item.id}
+                  style={page === item.id ? styles.navItemActive : styles.navItem}
+                  onClick={() => setPage(item.id)}
+                >
+                  <span style={styles.navIcon}>{item.icon}</span>
+                  {item.label}
+                </div>
+              ))}
+            </>
+          )}
+        </nav>
+
+        <div style={styles.sidebarFooter}>
+          <div style={styles.userRow}>
+            <div style={styles.avatar}>{initials}</div>
+            <div style={{ flex: 1 }}>
+              <div style={styles.userName}>{user.username}</div>
+              <div style={styles.userRole}>{user.role}</div>
+            </div>
+            <div style={styles.logoutBtn} onClick={handleLogout}>↩</div>
+          </div>
+        </div>
       </div>
 
-      {/* Content */}
-      <div className="max-w-3xl mx-auto px-4 py-8">
-        {page === 'register' && role === 'admin' && <Register />}
-        {page === 'search' && <Search />}
-        {page === 'all' && role === 'admin' && <AllRegistrations />}
-        {page === 'stats' && role === 'admin' && <Stats />}
+      {/* Main content */}
+      <div style={styles.main}>
+        {/* Topbar */}
+        <div style={styles.topbar}>
+          <div style={styles.topbarLeft}>
+            <span style={styles.breadcrumb}>
+              {page.charAt(0).toUpperCase() + page.slice(1)}
+            </span>
+          </div>
+          <div style={styles.topbarRight}>
+            <div style={styles.statusBadge}>
+              <div style={styles.statusDot} />
+              System online
+            </div>
+            <div style={styles.avatarSmall}>{initials}</div>
+          </div>
+        </div>
+
+        {/* Page content */}
+        <div style={styles.content}>
+          {page === 'dashboard' && <Dashboard setPage={setPage} />}
+          {page === 'register' && <Register />}
+          {page === 'search' && <Search />}
+          {page === 'all' && user.role === 'admin' && <AllRegistrations />}
+          {page === 'stats' && user.role === 'admin' && <Stats />}
+        </div>
       </div>
     </div>
   );
 }
+
+const styles: { [key: string]: React.CSSProperties } = {
+  app: { display: 'flex', height: '100vh', background: '#f8fafc', fontFamily: "'Inter', system-ui, sans-serif" },
+  sidebar: { width: '220px', background: '#0f172a', display: 'flex', flexDirection: 'column', flexShrink: 0 },
+  logoWrap: { padding: '18px 16px', borderBottom: '1px solid #1e293b', display: 'flex', alignItems: 'center', gap: '10px' },
+  logoIcon: { width: '32px', height: '32px', background: '#1e3a5f', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px' },
+  logoTitle: { color: '#ffffff', fontSize: '13px', fontWeight: '600' },
+  logoSub: { color: '#64748b', fontSize: '10px', marginTop: '2px' },
+  nav: { padding: '12px 8px', flex: 1 },
+  navSection: { color: '#475569', fontSize: '10px', fontWeight: '500', textTransform: 'uppercase', letterSpacing: '0.08em', padding: '8px 8px 4px' },
+  navItem: { display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 10px', borderRadius: '6px', color: '#94a3b8', fontSize: '12px', cursor: 'pointer', marginBottom: '2px' },
+  navItemActive: { display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 10px', borderRadius: '6px', color: '#60a5fa', fontSize: '12px', cursor: 'pointer', marginBottom: '2px', background: '#1e3a5f' },
+  navIcon: { fontSize: '14px', width: '16px', textAlign: 'center' },
+  sidebarFooter: { padding: '12px', borderTop: '1px solid #1e293b' },
+  userRow: { display: 'flex', alignItems: 'center', gap: '8px' },
+  avatar: { width: '30px', height: '30px', borderRadius: '50%', background: '#1e3a5f', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#60a5fa', fontSize: '11px', fontWeight: '500', flexShrink: 0 },
+  avatarSmall: { width: '28px', height: '28px', borderRadius: '50%', background: '#1e40af', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: '10px', fontWeight: '500' },
+  userName: { color: '#e2e8f0', fontSize: '12px', fontWeight: '500' },
+  userRole: { color: '#64748b', fontSize: '10px' },
+  logoutBtn: { color: '#64748b', cursor: 'pointer', fontSize: '16px', padding: '4px' },
+  main: { flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' },
+  topbar: { background: '#ffffff', borderBottom: '1px solid #e2e8f0', padding: '0 20px', height: '52px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 },
+  topbarLeft: { display: 'flex', alignItems: 'center', gap: '8px' },
+  topbarRight: { display: 'flex', alignItems: 'center', gap: '10px' },
+  breadcrumb: { fontSize: '14px', fontWeight: '500', color: '#0f172a' },
+  statusBadge: { display: 'flex', alignItems: 'center', gap: '6px', background: '#f0fdf4', padding: '4px 10px', borderRadius: '6px', fontSize: '11px', color: '#16a34a', fontWeight: '500' },
+  statusDot: { width: '6px', height: '6px', borderRadius: '50%', background: '#16a34a' },
+  content: { flex: 1, overflowY: 'auto', padding: '24px' },
+};
 
 export default App;
