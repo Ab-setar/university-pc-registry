@@ -12,7 +12,7 @@ interface User {
 }
 
 function App() {
-  const [page, setPage] = useState<string>('dashboard');
+  const [page, setPage] = useState('dashboard');
   const [user, setUser] = useState<User | null>(null);
 
   const handleLogin = (role: string, username: string) => {
@@ -30,9 +30,9 @@ function App() {
   const initials = user.username.slice(0, 2).toUpperCase();
 
   const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: '▦', section: 'main' },
+    { id: 'dashboard', label: 'Dashboard', icon: '▦', section: 'main', adminOnly: false },
     { id: 'register', label: 'Register PC', icon: '+', section: 'main', adminOnly: false },
-    { id: 'search', label: 'Search', icon: '⌕', section: 'main' },
+    { id: 'search', label: 'Search', icon: '⌕', section: 'main', adminOnly: false },
     { id: 'all', label: 'All computers', icon: '☰', section: 'admin', adminOnly: true },
     { id: 'stats', label: 'Analytics', icon: '↗', section: 'admin', adminOnly: true },
   ];
@@ -41,7 +41,6 @@ function App() {
 
   return (
     <div style={styles.app}>
-      {/* Sidebar */}
       <div style={styles.sidebar}>
         <div style={styles.logoWrap}>
           <div style={styles.logoIcon}>💻</div>
@@ -63,7 +62,6 @@ function App() {
               {item.label}
             </div>
           ))}
-
           {user.role === 'admin' && (
             <>
               <div style={styles.navSection}>Admin</div>
@@ -93,118 +91,7 @@ function App() {
         </div>
       </div>
 
-      {/* Main content */}
       <div style={styles.main}>
-        {/* Topbar */}
-        <div style={styles.topbar}>
-          <div style={styles.topbarLeft}>
-            <span style={styles.breadcrumb}>
-              {page.charAt(0).toUpperCase() + page.slice(1)}
-            </span>
-          </div>
-          <div style={styles.topbarRight}>
-            <div style={styles.statusBadge}>
-              <div style={styles.statusDot} />
-              System online
-            </div>
-import React, { useState } from 'react';
-import Login from './components/Login';
-import Register from './components/Register';
-import Search from './components/Search';
-import AllRegistrations from './components/AllRegistrations';
-import Stats from './components/Stats';
-import Dashboard from './components/Dashboard';
-
-interface User {
-  role: string;
-  username: string;
-}
-
-function App() {
-  const [page, setPage] = useState<string>('dashboard');
-  const [user, setUser] = useState<User | null>(null);
-
-  const handleLogin = (role: string, username: string) => {
-    setUser({ role, username });
-    setPage('dashboard');
-  };
-
-  const handleLogout = () => {
-    setUser(null);
-    setPage('dashboard');
-  };
-
-  if (!user) return <Login onLogin={handleLogin} />;
-
-  const initials = user.username.slice(0, 2).toUpperCase();
-
-  const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: '▦', section: 'main' },
-    { id: 'register', label: 'Register PC', icon: '+', section: 'main', adminOnly: false },
-    { id: 'search', label: 'Search', icon: '⌕', section: 'main' },
-    { id: 'all', label: 'All computers', icon: '☰', section: 'admin', adminOnly: true },
-    { id: 'stats', label: 'Analytics', icon: '↗', section: 'admin', adminOnly: true },
-  ];
-
-  const filteredNav = navItems.filter(item => !item.adminOnly || user.role === 'admin');
-
-  return (
-    <div style={styles.app}>
-      {/* Sidebar */}
-      <div style={styles.sidebar}>
-        <div style={styles.logoWrap}>
-          <div style={styles.logoIcon}>💻</div>
-          <div>
-            <div style={styles.logoTitle}>PC Registry</div>
-            <div style={styles.logoSub}>Univ. of Addis Ababa</div>
-          </div>
-        </div>
-
-        <nav style={styles.nav}>
-          {user.role === 'admin' && <div style={styles.navSection}>Main</div>}
-          {filteredNav.filter(i => i.section === 'main').map(item => (
-            <div
-              key={item.id}
-              style={page === item.id ? styles.navItemActive : styles.navItem}
-              onClick={() => setPage(item.id)}
-            >
-              <span style={styles.navIcon}>{item.icon}</span>
-              {item.label}
-            </div>
-          ))}
-
-          {user.role === 'admin' && (
-            <>
-              <div style={styles.navSection}>Admin</div>
-              {filteredNav.filter(i => i.section === 'admin').map(item => (
-                <div
-                  key={item.id}
-                  style={page === item.id ? styles.navItemActive : styles.navItem}
-                  onClick={() => setPage(item.id)}
-                >
-                  <span style={styles.navIcon}>{item.icon}</span>
-                  {item.label}
-                </div>
-              ))}
-            </>
-          )}
-        </nav>
-
-        <div style={styles.sidebarFooter}>
-          <div style={styles.userRow}>
-            <div style={styles.avatar}>{initials}</div>
-            <div style={{ flex: 1 }}>
-              <div style={styles.userName}>{user.username}</div>
-              <div style={styles.userRole}>{user.role}</div>
-            </div>
-            <div style={styles.logoutBtn} onClick={handleLogout}>↩</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main content */}
-      <div style={styles.main}>
-        {/* Topbar */}
         <div style={styles.topbar}>
           <div style={styles.topbarLeft}>
             <span style={styles.breadcrumb}>
@@ -220,7 +107,6 @@ function App() {
           </div>
         </div>
 
-        {/* Page content */}
         <div style={styles.content}>
           {page === 'dashboard' && <Dashboard setPage={setPage} />}
           {page === 'register' && <Register />}
