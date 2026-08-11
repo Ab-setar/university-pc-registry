@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import API_BASE from '../api';
 
 interface FormData {
   owner_name: string;
@@ -32,7 +33,7 @@ function Register() {
       return;
     }
     try {
-      const res = await fetch('https://university-pc-registry-production.up.railway.app/register', {
+      const res = await fetch(`${API_BASE}/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),

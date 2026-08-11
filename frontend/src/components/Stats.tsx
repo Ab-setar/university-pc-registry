@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import API_BASE from '../api';
 
 interface Registration {
   id: number;
@@ -25,7 +26,7 @@ function Stats() {
 
   const fetchAll = async () => {
     try {
-      const res = await fetch('https://university-pc-registry-production.up.railway.app/registrations');
+      const res = await fetch(`${API_BASE}/registrations`);
       const data: Registration[] = await res.json();
       setRegistrations(data);
       setLoading(false);

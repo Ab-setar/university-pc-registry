@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import API_BASE from '../api';
 
 interface Registration {
   id: number;
@@ -22,7 +23,7 @@ function Dashboard({ setPage }: Props) {
 
   const fetchAll = async () => {
     try {
-      const res = await fetch('https://university-pc-registry-production.up.railway.app/registrations');
+      const res = await fetch(`${API_BASE}/registrations`);
       const data = await res.json();
       setRegistrations(data);
       setLoading(false);
@@ -42,7 +43,7 @@ function Dashboard({ setPage }: Props) {
         <div style={styles.statCard}>
           <div style={styles.statTop}>
             <div style={styles.statLabel}>Total computers</div>
-            <div style={{...styles.statIcon, background: '#dbeafe'}}>💻</div>
+            <div style={{ ...styles.statIcon, background: '#dbeafe' }}>💻</div>
           </div>
           <div style={styles.statValue}>{total}</div>
           <div style={styles.statSub}>All registered laptops</div>
@@ -50,25 +51,25 @@ function Dashboard({ setPage }: Props) {
         <div style={styles.statCard}>
           <div style={styles.statTop}>
             <div style={styles.statLabel}>Inside campus</div>
-            <div style={{...styles.statIcon, background: '#dcfce7'}}>✓</div>
+            <div style={{ ...styles.statIcon, background: '#dcfce7' }}>✓</div>
           </div>
-          <div style={{...styles.statValue, color: '#16a34a'}}>{inside}</div>
+          <div style={{ ...styles.statValue, color: '#16a34a' }}>{inside}</div>
           <div style={styles.statSub}>Currently on campus</div>
         </div>
         <div style={styles.statCard}>
           <div style={styles.statTop}>
             <div style={styles.statLabel}>Outside campus</div>
-            <div style={{...styles.statIcon, background: '#fef9c3'}}>↗</div>
+            <div style={{ ...styles.statIcon, background: '#fef9c3' }}>↗</div>
           </div>
-          <div style={{...styles.statValue, color: '#ca8a04'}}>{outside}</div>
+          <div style={{ ...styles.statValue, color: '#ca8a04' }}>{outside}</div>
           <div style={styles.statSub}>Left the campus</div>
         </div>
         <div style={styles.statCard}>
           <div style={styles.statTop}>
             <div style={styles.statLabel}>Registered today</div>
-            <div style={{...styles.statIcon, background: '#fce7f3'}}>★</div>
+            <div style={{ ...styles.statIcon, background: '#fce7f3' }}>★</div>
           </div>
-          <div style={{...styles.statValue, color: '#db2777'}}>{today}</div>
+          <div style={{ ...styles.statValue, color: '#db2777' }}>{today}</div>
           <div style={styles.statSub}>New entries today</div>
         </div>
       </div>
@@ -103,7 +104,7 @@ function Dashboard({ setPage }: Props) {
                       <div style={styles.studentId}>{reg.student_id}</div>
                     </td>
                     <td style={styles.td}>{reg.laptop_brand}</td>
-                    <td style={{...styles.td, fontFamily: 'monospace', fontSize: '11px', color: '#64748b'}}>{reg.serial_number}</td>
+                    <td style={{ ...styles.td, fontFamily: 'monospace', fontSize: '11px', color: '#64748b' }}>{reg.serial_number}</td>
                     <td style={styles.td}>
                       <span style={reg.status === 'inside' ? styles.badgeGreen : styles.badgeAmber}>
                         {reg.status === 'inside' ? 'Inside' : 'Outside'}
@@ -112,7 +113,7 @@ function Dashboard({ setPage }: Props) {
                   </tr>
                 ))}
                 {recent.length === 0 && (
-                  <tr><td colSpan={4} style={{...styles.td, textAlign: 'center', color: '#94a3b8'}}>No registrations yet</td></tr>
+                  <tr><td colSpan={4} style={{ ...styles.td, textAlign: 'center', color: '#94a3b8' }}>No registrations yet</td></tr>
                 )}
               </tbody>
             </table>
@@ -132,7 +133,7 @@ function Dashboard({ setPage }: Props) {
                 { icon: '📊', label: 'Analytics', sub: 'View statistics and reports', page: 'stats', bg: '#fce7f3', color: '#be185d' },
               ].map(item => (
                 <div key={item.page} style={styles.qBtn} onClick={() => setPage(item.page)}>
-                  <div style={{...styles.qIcon, background: item.bg, color: item.color}}>{item.icon}</div>
+                  <div style={{ ...styles.qIcon, background: item.bg, color: item.color }}>{item.icon}</div>
                   <div>
                     <div style={styles.qLabel}>{item.label}</div>
                     <div style={styles.qSub}>{item.sub}</div>

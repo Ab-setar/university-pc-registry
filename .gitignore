@@ -13,3 +13,9 @@ frontend/build
 
 # Logs
 npm-debug.log*
+
+# Editor
+.vscode/
+
+# Temp files
+*.save
