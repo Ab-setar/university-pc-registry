@@ -1,19 +1,22 @@
 import React, { useState } from 'react';
-import Login from './components/Login';
+import { Routes, Route, useNavigate } from 'react-router-dom';
+import HomePage from './pages/HomePage';
+import LoginPage from './pages/LoginPage';
+import Dashboard from './components/Dashboard';
 import Register from './components/Register';
 import Search from './components/Search';
 import AllRegistrations from './components/AllRegistrations';
 import Stats from './components/Stats';
-import Dashboard from './components/Dashboard';
 
 interface User {
   role: string;
   username: string;
 }
 
-function App() {
+function AppShell() {
   const [page, setPage] = useState('dashboard');
   const [user, setUser] = useState<User | null>(null);
+  const navigate = useNavigate();
 
   const handleLogin = (role: string, username: string) => {
     setUser({ role, username });
@@ -22,10 +25,10 @@ function App() {
 
   const handleLogout = () => {
     setUser(null);
-    setPage('dashboard');
+    navigate('/');
   };
 
-  if (!user) return <Login onLogin={handleLogin} />;
+  if (!user) return <LoginPage onLogin={handleLogin} />;
 
   const initials = user.username.slice(0, 2).toUpperCase();
 
@@ -33,7 +36,7 @@ function App() {
     { id: 'dashboard', label: 'Dashboard', icon: '▦', section: 'main', adminOnly: false },
     { id: 'register', label: 'Register PC', icon: '+', section: 'main', adminOnly: false },
     { id: 'search', label: 'Search', icon: '⌕', section: 'main', adminOnly: false },
-    { id: 'all', label: 'All computers', icon: '☰', section: 'admin', adminOnly: true },
+    { id: 'all', label: 'All Computers', icon: '☰', section: 'admin', adminOnly: true },
     { id: 'stats', label: 'Analytics', icon: '↗', section: 'admin', adminOnly: true },
   ];
 
@@ -43,42 +46,30 @@ function App() {
     <div style={styles.app}>
       <div style={styles.sidebar}>
         <div style={styles.logoWrap}>
-          <div style={styles.logoIcon}>💻</div>
+          <img src="/asset/logo.png" alt="HU" style={{ width: 28, height: 28, borderRadius: '50%', objectFit: 'cover' }} />
           <div>
             <div style={styles.logoTitle}>PC Registry</div>
-            <div style={styles.logoSub}>Univ. of Addis Ababa</div>
+            <div style={styles.logoSub}>Haramaya University</div>
           </div>
         </div>
-
         <nav style={styles.nav}>
           {user.role === 'admin' && <div style={styles.navSection}>Main</div>}
           {filteredNav.filter(i => i.section === 'main').map(item => (
-            <div
-              key={item.id}
-              style={page === item.id ? styles.navItemActive : styles.navItem}
-              onClick={() => setPage(item.id)}
-            >
-              <span style={styles.navIcon}>{item.icon}</span>
-              {item.label}
+            <div key={item.id} style={page === item.id ? styles.navItemActive : styles.navItem} onClick={() => setPage(item.id)}>
+              <span style={styles.navIcon}>{item.icon}</span>{item.label}
             </div>
           ))}
           {user.role === 'admin' && (
             <>
               <div style={styles.navSection}>Admin</div>
               {filteredNav.filter(i => i.section === 'admin').map(item => (
-                <div
-                  key={item.id}
-                  style={page === item.id ? styles.navItemActive : styles.navItem}
-                  onClick={() => setPage(item.id)}
-                >
-                  <span style={styles.navIcon}>{item.icon}</span>
-                  {item.label}
+                <div key={item.id} style={page === item.id ? styles.navItemActive : styles.navItem} onClick={() => setPage(item.id)}>
+                  <span style={styles.navIcon}>{item.icon}</span>{item.label}
                 </div>
               ))}
             </>
           )}
         </nav>
-
         <div style={styles.sidebarFooter}>
           <div style={styles.userRow}>
             <div style={styles.avatar}>{initials}</div>
@@ -86,27 +77,18 @@ function App() {
               <div style={styles.userName}>{user.username}</div>
               <div style={styles.userRole}>{user.role}</div>
             </div>
-            <div style={styles.logoutBtn} onClick={handleLogout}>↩</div>
+            <div style={styles.logoutBtn} onClick={handleLogout} title="Logout">↩</div>
           </div>
         </div>
       </div>
-
       <div style={styles.main}>
         <div style={styles.topbar}>
-          <div style={styles.topbarLeft}>
-            <span style={styles.breadcrumb}>
-              {page.charAt(0).toUpperCase() + page.slice(1)}
-            </span>
-          </div>
+          <span style={styles.breadcrumb}>{page.charAt(0).toUpperCase() + page.slice(1)}</span>
           <div style={styles.topbarRight}>
-            <div style={styles.statusBadge}>
-              <div style={styles.statusDot} />
-              System online
-            </div>
+            <div style={styles.statusBadge}><div style={styles.statusDot} />System online</div>
             <div style={styles.avatarSmall}>{initials}</div>
           </div>
         </div>
-
         <div style={styles.content}>
           {page === 'dashboard' && <Dashboard setPage={setPage} />}
           {page === 'register' && <Register />}
@@ -119,11 +101,20 @@ function App() {
   );
 }
 
+export default function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<HomePage />} />
+      <Route path="/login" element={<AppShell />} />
+      <Route path="*" element={<HomePage />} />
+    </Routes>
+  );
+}
+
 const styles: { [key: string]: React.CSSProperties } = {
   app: { display: 'flex', height: '100vh', background: '#f8fafc', fontFamily: "'Inter', system-ui, sans-serif" },
   sidebar: { width: '220px', background: '#0f172a', display: 'flex', flexDirection: 'column', flexShrink: 0 },
   logoWrap: { padding: '18px 16px', borderBottom: '1px solid #1e293b', display: 'flex', alignItems: 'center', gap: '10px' },
-  logoIcon: { width: '32px', height: '32px', background: '#1e3a5f', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px' },
   logoTitle: { color: '#ffffff', fontSize: '13px', fontWeight: '600' },
   logoSub: { color: '#64748b', fontSize: '10px', marginTop: '2px' },
   nav: { padding: '12px 8px', flex: 1 },
@@ -140,12 +131,9 @@ const styles: { [key: string]: React.CSSProperties } = {
   logoutBtn: { color: '#64748b', cursor: 'pointer', fontSize: '16px', padding: '4px' },
   main: { flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' },
   topbar: { background: '#ffffff', borderBottom: '1px solid #e2e8f0', padding: '0 20px', height: '52px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 },
-  topbarLeft: { display: 'flex', alignItems: 'center', gap: '8px' },
   topbarRight: { display: 'flex', alignItems: 'center', gap: '10px' },
   breadcrumb: { fontSize: '14px', fontWeight: '500', color: '#0f172a' },
   statusBadge: { display: 'flex', alignItems: 'center', gap: '6px', background: '#f0fdf4', padding: '4px 10px', borderRadius: '6px', fontSize: '11px', color: '#16a34a', fontWeight: '500' },
   statusDot: { width: '6px', height: '6px', borderRadius: '50%', background: '#16a34a' },
   content: { flex: 1, overflowY: 'auto', padding: '24px' },
 };
-
-export default App;
