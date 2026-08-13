@@ -75,7 +75,7 @@ function ParticleCanvas() {
         camera.position.z = 80;
 
         // Particles
-        const count = 180;
+        const count = 120;
         const positions = new Float32Array(count * 3);
         const particleData: { velocity: THREE.Vector3 }[] = [];
 
@@ -92,10 +92,17 @@ function ParticleCanvas() {
         const points = new THREE.Points(geo, mat);
         scene.add(points);
 
-        // Connection lines
-        const lineMat = new THREE.LineBasicMaterial({ color: 0x1e40af, transparent: true, opacity: 0.15 });
-        const lineGroup = new THREE.Group();
-        scene.add(lineGroup);
+        // Pre-allocate a single LineSegments buffer — max possible pairs
+        const maxLines = count * 8; // max connections per particle capped
+        const linePositions = new Float32Array(maxLines * 2 * 3);
+        const lineGeo = new THREE.BufferGeometry();
+        const linePosAttr = new THREE.BufferAttribute(linePositions, 3);
+        linePosAttr.setUsage(THREE.DynamicDrawUsage);
+        lineGeo.setAttribute('position', linePosAttr);
+        lineGeo.setDrawRange(0, 0);
+        const lineMat = new THREE.LineBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.18 });
+        const lineSegments = new THREE.LineSegments(lineGeo, lineMat);
+        scene.add(lineSegments);
 
         let mouse = { x: 0, y: 0 };
         const onMouseMove = (e: MouseEvent) => {
@@ -118,25 +125,27 @@ function ParticleCanvas() {
             }
             geo.attributes.position.needsUpdate = true;
 
-            // Update connections (only nearby pairs)
-            while (lineGroup.children.length) lineGroup.remove(lineGroup.children[0]);
+            // Update connections in-place — no allocations
             const maxDist = 25;
-            for (let i = 0; i < count; i++) {
-                for (let j = i + 1; j < count; j++) {
+            const maxDistSq = maxDist * maxDist;
+            let lineIdx = 0;
+            for (let i = 0; i < count && lineIdx < maxLines - 1; i++) {
+                for (let j = i + 1; j < count && lineIdx < maxLines - 1; j++) {
                     const dx = pos[i * 3] - pos[j * 3];
                     const dy = pos[i * 3 + 1] - pos[j * 3 + 1];
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < maxDist) {
-                        const lineGeo = new THREE.BufferGeometry().setFromPoints([
-                            new THREE.Vector3(pos[i * 3], pos[i * 3 + 1], pos[i * 3 + 2]),
-                            new THREE.Vector3(pos[j * 3], pos[j * 3 + 1], pos[j * 3 + 2]),
-                        ]);
-                        const opacity = (1 - dist / maxDist) * 0.3;
-                        const lm = new THREE.LineBasicMaterial({ color: 0x3b82f6, transparent: true, opacity });
-                        lineGroup.add(new THREE.Line(lineGeo, lm));
+                    if (dx * dx + dy * dy < maxDistSq) {
+                        linePositions[lineIdx * 6 + 0] = pos[i * 3];
+                        linePositions[lineIdx * 6 + 1] = pos[i * 3 + 1];
+                        linePositions[lineIdx * 6 + 2] = pos[i * 3 + 2];
+                        linePositions[lineIdx * 6 + 3] = pos[j * 3];
+                        linePositions[lineIdx * 6 + 4] = pos[j * 3 + 1];
+                        linePositions[lineIdx * 6 + 5] = pos[j * 3 + 2];
+                        lineIdx++;
                     }
                 }
             }
+            linePosAttr.needsUpdate = true;
+            lineGeo.setDrawRange(0, lineIdx * 2);
 
             // Parallax camera
             camera.position.x += (mouse.x - camera.position.x) * 0.02;
