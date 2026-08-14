@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import * as THREE from 'three';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 interface StatItem { label: string; value: number; suffix: string; icon: string; }
@@ -65,102 +64,93 @@ function ParticleCanvas() {
     useEffect(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
 
-        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-        renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+        const COUNT = 100;
+        const MAX_DIST = 140;
+        const MAX_DIST_SQ = MAX_DIST * MAX_DIST;
 
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(60, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
-        camera.position.z = 80;
+        let W = canvas.offsetWidth;
+        let H = canvas.offsetHeight;
+        canvas.width = W;
+        canvas.height = H;
 
-        // Particles
-        const count = 120;
-        const positions = new Float32Array(count * 3);
-        const particleData: { velocity: THREE.Vector3 }[] = [];
+        type Particle = { x: number; y: number; vx: number; vy: number; r: number };
+        const particles: Particle[] = Array.from({ length: COUNT }, () => ({
+            x: Math.random() * W,
+            y: Math.random() * H,
+            vx: (Math.random() - 0.5) * 0.4,
+            vy: (Math.random() - 0.5) * 0.4,
+            r: Math.random() * 1.5 + 1,
+        }));
 
-        for (let i = 0; i < count; i++) {
-            positions[i * 3] = (Math.random() - 0.5) * 160;
-            positions[i * 3 + 1] = (Math.random() - 0.5) * 100;
-            positions[i * 3 + 2] = (Math.random() - 0.5) * 60;
-            particleData.push({ velocity: new THREE.Vector3((Math.random() - 0.5) * 0.05, (Math.random() - 0.5) * 0.05, 0) });
-        }
-
-        const geo = new THREE.BufferGeometry();
-        geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        const mat = new THREE.PointsMaterial({ color: 0x3b82f6, size: 0.8, transparent: true, opacity: 0.8 });
-        const points = new THREE.Points(geo, mat);
-        scene.add(points);
-
-        // Pre-allocate a single LineSegments buffer — max possible pairs
-        const maxLines = count * 8; // max connections per particle capped
-        const linePositions = new Float32Array(maxLines * 2 * 3);
-        const lineGeo = new THREE.BufferGeometry();
-        const linePosAttr = new THREE.BufferAttribute(linePositions, 3);
-        linePosAttr.setUsage(THREE.DynamicDrawUsage);
-        lineGeo.setAttribute('position', linePosAttr);
-        lineGeo.setDrawRange(0, 0);
-        const lineMat = new THREE.LineBasicMaterial({ color: 0x3b82f6, transparent: true, opacity: 0.18 });
-        const lineSegments = new THREE.LineSegments(lineGeo, lineMat);
-        scene.add(lineSegments);
-
-        let mouse = { x: 0, y: 0 };
-        const onMouseMove = (e: MouseEvent) => {
-            mouse.x = (e.clientX / window.innerWidth - 0.5) * 30;
-            mouse.y = -(e.clientY / window.innerHeight - 0.5) * 20;
-        };
+        let mouse = { x: W / 2, y: H / 2 };
+        const onMouseMove = (e: MouseEvent) => { mouse.x = e.clientX; mouse.y = e.clientY; };
         window.addEventListener('mousemove', onMouseMove);
 
         let animId: number;
-        const animate = () => {
-            animId = requestAnimationFrame(animate);
-            const pos = geo.attributes.position.array as Float32Array;
+        const draw = () => {
+            animId = requestAnimationFrame(draw);
+            ctx.clearRect(0, 0, W, H);
 
-            // Move particles
-            for (let i = 0; i < count; i++) {
-                pos[i * 3] += particleData[i].velocity.x;
-                pos[i * 3 + 1] += particleData[i].velocity.y;
-                if (Math.abs(pos[i * 3]) > 80) particleData[i].velocity.x *= -1;
-                if (Math.abs(pos[i * 3 + 1]) > 50) particleData[i].velocity.y *= -1;
+            // Move
+            for (const p of particles) {
+                p.x += p.vx;
+                p.y += p.vy;
+                if (p.x < 0 || p.x > W) p.vx *= -1;
+                if (p.y < 0 || p.y > H) p.vy *= -1;
             }
-            geo.attributes.position.needsUpdate = true;
 
-            // Update connections in-place — no allocations
-            const maxDist = 25;
-            const maxDistSq = maxDist * maxDist;
-            let lineIdx = 0;
-            for (let i = 0; i < count && lineIdx < maxLines - 1; i++) {
-                for (let j = i + 1; j < count && lineIdx < maxLines - 1; j++) {
-                    const dx = pos[i * 3] - pos[j * 3];
-                    const dy = pos[i * 3 + 1] - pos[j * 3 + 1];
-                    if (dx * dx + dy * dy < maxDistSq) {
-                        linePositions[lineIdx * 6 + 0] = pos[i * 3];
-                        linePositions[lineIdx * 6 + 1] = pos[i * 3 + 1];
-                        linePositions[lineIdx * 6 + 2] = pos[i * 3 + 2];
-                        linePositions[lineIdx * 6 + 3] = pos[j * 3];
-                        linePositions[lineIdx * 6 + 4] = pos[j * 3 + 1];
-                        linePositions[lineIdx * 6 + 5] = pos[j * 3 + 2];
-                        lineIdx++;
+            // Draw connections
+            for (let i = 0; i < COUNT; i++) {
+                for (let j = i + 1; j < COUNT; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const distSq = dx * dx + dy * dy;
+                    if (distSq < MAX_DIST_SQ) {
+                        const alpha = (1 - Math.sqrt(distSq) / MAX_DIST) * 0.25;
+                        ctx.strokeStyle = `rgba(59,130,246,${alpha})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.stroke();
                     }
                 }
             }
-            linePosAttr.needsUpdate = true;
-            lineGeo.setDrawRange(0, lineIdx * 2);
 
-            // Parallax camera
-            camera.position.x += (mouse.x - camera.position.x) * 0.02;
-            camera.position.y += (mouse.y - camera.position.y) * 0.02;
-            camera.lookAt(scene.position);
+            // Mouse proximity boost
+            for (const p of particles) {
+                const dx = p.x - mouse.x;
+                const dy = p.y - mouse.y;
+                const distSq = dx * dx + dy * dy;
+                if (distSq < 22500) {
+                    const alpha = (1 - Math.sqrt(distSq) / 150) * 0.5;
+                    ctx.strokeStyle = `rgba(6,182,212,${alpha})`;
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(mouse.x, mouse.y);
+                    ctx.stroke();
+                }
+            }
 
-            renderer.render(scene, camera);
+            // Draw dots
+            for (const p of particles) {
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(59,130,246,0.7)';
+                ctx.fill();
+            }
         };
-        animate();
+        draw();
 
         const onResize = () => {
-            if (!canvas) return;
-            renderer.setSize(canvas.clientWidth, canvas.clientHeight);
-            camera.aspect = canvas.clientWidth / canvas.clientHeight;
-            camera.updateProjectionMatrix();
+            W = canvas.offsetWidth;
+            H = canvas.offsetHeight;
+            canvas.width = W;
+            canvas.height = H;
         };
         window.addEventListener('resize', onResize);
 
@@ -168,7 +158,6 @@ function ParticleCanvas() {
             cancelAnimationFrame(animId);
             window.removeEventListener('mousemove', onMouseMove);
             window.removeEventListener('resize', onResize);
-            renderer.dispose();
         };
     }, []);
 
